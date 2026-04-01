@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yeqifu.bus.mapper.AssetMapper">
+    <select id="loadAssetStatusStat" resultType="java.util.Map">
+        SELECT status as name, COUNT(1) as value FROM bus_asset GROUP BY status
+    </select>
+    
+    <select id="loadAssetTypeStat" resultType="java.util.Map">
+        SELECT type as name, COUNT(1) as value FROM bus_asset GROUP BY type
+    </select>
+    
+    <select id="loadInStockAssetTypeStat" resultType="java.util.Map">
+        SELECT type as name, COUNT(1) as value FROM bus_asset WHERE status = 'IN_STOCK' GROUP BY type
+    </select>
+    
+    <select id="loadOutStockAssetTypeStat" resultType="java.util.Map">
+        SELECT type as name, COUNT(1) as value FROM bus_asset WHERE status = 'OUT' GROUP BY type
+    </select>
+</mapper>

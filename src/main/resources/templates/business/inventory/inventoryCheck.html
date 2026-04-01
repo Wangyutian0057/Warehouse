@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>库存盘点</title>
+    <link rel="stylesheet" href="/resources/layui/css/layui.css" media="all"/>
+    <link rel="stylesheet" href="/resources/css/public.css" media="all"/>
+</head>
+<body>
+    <blockquote class="layui-elem-quote">
+        库存盘点清单生成
+        <button class="layui-btn layui-btn-sm" style="float:right" onclick="window.print()">打印清单</button>
+    </blockquote>
+    
+    <fieldset class="layui-elem-field layui-field-title">
+        <legend>资产盘点清单</legend>
+    </fieldset>
+    <table class="layui-hide" id="assetTable"></table>
+    
+    <fieldset class="layui-elem-field layui-field-title">
+        <legend>耗材盘点清单</legend>
+    </fieldset>
+    <table class="layui-hide" id="consumableTable"></table>
+
+<script type="text/javascript" src="/resources/layui/layui.js"></script>
+<script type="text/javascript">
+    layui.use(['table'], function () {
+        var table = layui.table;
+        table.render({
+            elem: "#assetTable",
+            url: "/asset/loadAllAsset",
+            page: false,
+            limit: 1000,
+            cols: [ [
+                {field: 'maintenanceId', title: '运维编号'},
+                {field: 'type', title: '设备类型'},
+                {field: 'brand', title: '品牌'},
+                {field: 'location', title: '位置'},
+                {field: 'status', title: '状态', templet: function(d){
+                    return d.status == 'IN_STOCK' ? '在库' : '已出库';
+                }},
+                {title: '盘点结果', width: 150, templet: function(){ return '_______'}}
+            ] ]
+        });
+        table.render({
+            elem: "#consumableTable",
+            url: "/consumable/loadAllConsumable",
+            page: false,
+            limit: 1000,
+            cols: [ [
+                {field: 'type', title: '耗材名称'},
+                {field: 'quantity', title: '账面数量'},
+                {field: 'location', title: '位置'},
+                {field: 'threshold', title: '预警阈值'},
+                {title: '盘点数量', width: 150, templet: function(){ return '_______'}}
+            ] ]
+        });
+    });
+</script>
+</body>
+</html>

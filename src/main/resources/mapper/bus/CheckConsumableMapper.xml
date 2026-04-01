@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yeqifu.bus.mapper.CheckConsumableMapper">
+    <select id="queryCheckConsumables" resultType="com.yeqifu.bus.entity.CheckConsumable">
+        SELECT cc.*, c.type as consumableName, c.location
+        FROM bus_check_consumable cc
+        LEFT JOIN bus_consumable c ON cc.consumable_id = c.id
+        WHERE cc.check_id = #{checkId}
+    </select>
+</mapper>

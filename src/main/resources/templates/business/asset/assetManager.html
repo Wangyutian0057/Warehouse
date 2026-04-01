@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>资产管理</title>
+    <link rel="stylesheet" href="/resources/layui/css/layui.css" media="all"/>
+    <link rel="stylesheet" href="/resources/css/public.css" media="all"/>
+</head>
+<body>
+<fieldset class="layui-elem-field layui-field-title" style="margin-top: 15px;">
+    <legend>查询条件</legend>
+</fieldset>
+<form action="" method="post" id="searchFrm" lay-filter="searchFrm" class="layui-form">
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">运维编号</label>
+            <div class="layui-input-inline">
+                <input type="text" name="maintenanceId" class="layui-input input-radius" placeholder="请输入运维编号">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">资产编号</label>
+            <div class="layui-input-inline">
+                <input type="text" name="assetNo" class="layui-input input-radius" placeholder="请输入资产编号">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">设备类型</label>
+            <div class="layui-input-inline">
+                <select name="type">
+                    <option value="">请选择设备类型</option>
+                    <option value="台式电脑">台式电脑</option>
+                    <option value="笔记本电脑">笔记本电脑</option>
+                    <option value="显示器">显示器</option>
+                    <option value="打印机">打印机</option>
+                    <option value="交换机">交换机</option>
+                    <option value="服务器">服务器</option>
+                    <option value="路由器">龙门吊终端</option>
+                    <option value="摄像头">集卡终端</option>
+                    <option value="其他">其他</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">开始时间</label>
+            <div class="layui-input-inline">
+                <input type="text" name="startTime" id="startTime" readonly class="layui-input input-radius" placeholder="yyyy-MM-dd HH:mm:ss">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">结束时间</label>
+            <div class="layui-input-inline">
+                <input type="text" name="endTime" id="endTime" readonly class="layui-input input-radius" placeholder="yyyy-MM-dd HH:mm:ss">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <button type="button" class="layui-btn layui-btn-sm layui-btn-radius" lay-submit="" lay-filter="doSearch"><i class="layui-icon layui-icon-search"></i>查询</button>
+            <button type="reset" class="layui-btn layui-btn-sm layui-btn-radius layui-btn-warm"><i class="layui-icon layui-icon-refresh"></i>重置</button>
+        </div>
+    </div>
+</form>
+
+<div>
+    <table class="layui-hide" id="assetTable" lay-filter="assetTable"></table>
+    <div id="assetToolBar" style="display: none">
+        <shiro:hasPermission name="asset:create">
+            <button type="button" lay-event="add" class="layui-btn layui-btn-sm layui-btn-normal layui-btn-radius">
+                <i class="layui-icon layui-icon-add-1"></i>资产入库
+            </button>
+        </shiro:hasPermission>
+        <shiro:lacksPermission name="asset:create">
+            <button type="button" lay-event="" class="layui-btn layui-btn-sm layui-btn-disabled layui-btn-radius">
+                <i class="layui-icon layui-icon-add-1"></i>资产入库
+            </button>
+        </shiro:lacksPermission>
+
+        <shiro:hasPermission name="asset:create">
+            <button type="button" lay-event="batchImport" class="layui-btn layui-btn-sm layui-btn-warm layui-btn-radius">
+                <i class="layui-icon layui-icon-upload-drag"></i>批量导入
+            </button>
+        </shiro:hasPermission>
+        <shiro:lacksPermission name="asset:create">
+            <button type="button" lay-event="" class="layui-btn layui-btn-sm layui-btn-disabled layui-btn-radius">
+                <i class="layui-icon layui-icon-upload-drag"></i>批量导入
+            </button>
+        </shiro:lacksPermission>
+
+        <button type="button" lay-event="downloadTemplate" class="layui-btn layui-btn-sm layui-btn-primary layui-btn-radius">
+            <i class="layui-icon layui-icon-download-circle"></i>下载模板
+        </button>
+        
+        <shiro:hasPermission name="asset:delete">
+            <button type="button" lay-event="batchDelete" class="layui-btn layui-btn-sm layui-btn-danger layui-btn-radius">
+                <i class="layui-icon layui-icon-delete"></i>批量删除
+            </button>
+        </shiro:hasPermission>
+    </div>
+    <div id="assetRowBar" style="display: none;">
+        <shiro:hasPermission name="asset:update">
+            <button type="button" lay-event="update" class="layui-btn layui-btn-xs layui-btn-radius"><i class="layui-icon layui-icon-edit"></i>修改</button>
+        </shiro:hasPermission>
+        <shiro:lacksPermission name="asset:update">
+            <button type="button" lay-event="" class="layui-btn layui-btn-xs layui-btn-disabled layui-btn-radius"><i class="layui-icon layui-icon-edit"></i>修改</button>
+        </shiro:lacksPermission>
+
+        <shiro:hasPermission name="asset:delete">
+            <button type="button" lay-event="delete" class="layui-btn layui-btn-xs layui-btn-danger layui-btn-radius"><i class="layui-icon layui-icon-delete"></i>删除</button>
+        </shiro:hasPermission>
+        <shiro:lacksPermission name="asset:delete">
+            <button type="button" lay-event="" class="layui-btn layui-btn-xs layui-btn-disabled layui-btn-radius"><i class="layui-icon layui-icon-delete"></i>删除</button>
+        </shiro:lacksPermission>
+
+        <shiro:hasPermission name="asset:outport">
+            <button type="button" lay-event="outport" class="layui-btn layui-btn-xs layui-btn-warm layui-btn-radius">出库</button>
+        </shiro:hasPermission>
+        <shiro:lacksPermission name="asset:outport">
+            <button type="button" lay-event="" class="layui-btn layui-btn-xs layui-btn-disabled layui-btn-radius">出库</button>
+        </shiro:lacksPermission>
+    </div>
+</div>
+
+<!-- 出库弹出层 -->
+<div id="outportDiv" style="display: none;padding: 10px;">
+    <form action="" method="post" class="layui-form" id="outportFrm" lay-filter="outportFrm">
+        <input type="hidden" name="assetId">
+        <div class="layui-form-item">
+            <label class="layui-form-label">出库类型</label>
+            <div class="layui-input-block">
+                <select name="type">
+                    <option value="领用出库">领用出库</option>
+                    <option value="借用出库">借用出库</option>
+                    <option value="报废出库">报废出库</option>
+                    <option value="调拨出库">调拨出库</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">申请人</label>
+            <div class="layui-input-block">
+                <select name="applicant" lay-verify="required" lay-search id="assetApplicantSelect">
+                    <option value="">请输入或选择申请人</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">备注说明</label>
+            <div class="layui-input-block">
+                <textarea name="remark" class="layui-textarea" placeholder="请输入备注说明"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item" style="text-align: center;">
+            <button type="button" class="layui-btn layui-btn-radius" lay-submit="" lay-filter="doOutport">确认出库</button>
+        </div>
+    </form>
+</div>
+
+<!-- 添加/修改弹出层 -->
+<div id="addOrUpdateDiv" style="display: none;padding: 10px;">
+    <form action="" method="post" class="layui-form" id="dataFrm" lay-filter="dataFrm">
+        <input type="hidden" name="id">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">运维编号</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="maintenanceId" class="layui-input input-radius" placeholder="留空自动生成">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">设备类型</label>
+                <div class="layui-input-inline">
+                    <select name="type">
+                        <option value="台式电脑">台式电脑</option>
+                        <option value="笔记本电脑">笔记本电脑</option>
+                        <option value="显示器">显示器</option>
+                        <option value="打印机">打印机</option>
+                        <option value="交换机">交换机</option>
+                        <option value="服务器">服务器</option>
+                        <option value="路由器">龙门吊终端</option>
+                        <option value="摄像头">集卡终端</option>
+                        <option value="其他">其他</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">设备品牌</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="brand" class="layui-input input-radius" placeholder="设备品牌">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">序列号</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="serialNo" class="layui-input input-radius" placeholder="设备序列号">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">资产编号</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="assetNo" class="layui-input input-radius" placeholder="固定资产编号">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">存放位置</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="location" class="layui-input input-radius" placeholder="仓库/办公区位置">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">入库来源</label>
+                <div class="layui-input-inline">
+                    <select name="source">
+                        <option value="采购入库">采购入库</option>
+                        <option value="备件入库">备件入库</option>
+                        <option value="捐赠入库">捐赠入库</option>
+                        <option value="借用入库">借用入库</option>
+                        <option value="其他来源">其他来源</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="text-align: center;">
+                <button type="button" class="layui-btn layui-btn-radius" lay-submit="" lay-filter="doSubmit"><i class="layui-icon layui-icon-search layui-icon-normal"></i>提交</button>
+                <button type="reset" class="layui-btn layui-btn-radius layui-btn-warm"><i class="layui-icon layui-icon-refresh"></i>重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- 类型管理弹出层 -->
+<div id="typeManagerDiv" style="display: none;padding: 10px;">
+    <table class="layui-hide" id="typeTable" lay-filter="typeTable"></table>
+    <div id="typeToolBar" style="display: none">
+        <button type="button" lay-event="addType" class="layui-btn layui-btn-sm layui-btn-normal layui-btn-radius">
+            <i class="layui-icon layui-icon-add-1"></i>添加类型
+        </button>
+    </div>
+    <div id="typeRowBar" style="display: none;">
+        <button type="button" lay-event="deleteType" class="layui-btn layui-btn-xs layui-btn-danger layui-btn-radius"><i class="layui-icon layui-icon-delete"></i>删除</button>
+    </div>
+</div>
+
+<!-- 添加类型弹出层 -->
+<div id="addTypeDiv" style="display: none;padding: 10px;">
+    <form action="" method="post" class="layui-form" id="typeFrm" lay-filter="typeFrm">
+        <div class="layui-form-item">
+            <label class="layui-form-label">类型名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="name" lay-verify="required" class="layui-input input-radius" placeholder="请输入类型名称">
+            </div>
+        </div>
+        <div class="layui-form-item" style="text-align: center;">
+            <button type="button" class="layui-btn layui-btn-radius" lay-submit="" lay-filter="doSubmitType">提交</button>
+        </div>
+    </form>
+</div>
+
+<!-- 导入弹出层 -->
+<div id="importDiv" style="display: none;padding: 10px;text-align: center;">
+    <div class="layui-upload-drag" id="uploadFile">
+        <i class="layui-icon"></i>
+        <p>点击上传，或将文件拖拽到此处</p>
+    </div>
+</div>
+
+<script type="text/javascript" src="/resources/layui/layui.js"></script>
+<script type="text/javascript">
+    var tableIns;
+    layui.use(['jquery', 'form', 'layer', 'table', 'laydate', 'upload'], function () {
+        var $ = layui.jquery;
+        var form = layui.form;
+        var layer = layui.layer;
+        var table = layui.table;
+        var laydate = layui.laydate;
+        var upload = layui.upload;
+
+        // 初始化加载下拉框
+        initAssetTypeSelect();
+        initApplicantSelect();
+
+        function initApplicantSelect() {
+            var data = [
+                {name:'董升'}, {name:'吴斌'}, {name:'贺嫣'}, {name:'陆培德'}, 
+                {name:'温常青'},{name:'胡燕峰'},{name:'袁圆'}, {name:'冯洲豪'}, 
+                {name:'孙磊'},{name:'吴亮'},{name:'张广纬'}, {name:'沈惠银'}, 
+                {name:'张巧静'},{name:'宣明芬'},{name:'金纵横'}, {name:'王宁怡'}, 
+                {name:'王禹添'},{name:'汤健凯'},{name:'贺少常'}, {name:'蔡豪斌'}, 
+                {name:'樊俊'},{name:'潘欣'},{name:'黎超'},{name:'王臻'}, 
+                {name:'徐文达'},{name:'虞圆浩'},{name:'贺坚宁'}, {name:'刘博宁'}, 
+                {name:'胡瑜'}, {name:'王明杰'}, {name:'王波'}, {name:'蒋晓'},{name:'苗展鹏'},{name:'备用人员'}
+            ];
+            
+            var html = '<option value="">请输入或选择申请人</option>';
+            $.each(data, function(index, item){
+                html += '<option value="'+item.name+'">' + item.name + '</option>';
+            });
+            $("#assetApplicantSelect").html(html);
+            form.render("select");
+        }
+
+        function initAssetTypeSelect() {
+            $.get("/assetType/loadAllAssetType", function(res){
+                var data = res.data;
+                // Only select the type dropdowns in search form and add/update form
+                // Exclude outport form which uses 'type' for outport type (fixed options)
+                var dom = $("#searchFrm select[name='type'], #dataFrm select[name='type']");
+                var html = '<option value="">请选择设备类型</option>';
+                $.each(data, function(index, item){
+                    html += '<option value="'+item.name+'">'+item.name+'</option>';
+                });
+                dom.html(html);
+                form.render("select");
+            });
+        }
+
+        laydate.render({elem:'#startTime', type:'datetime'});
+        laydate.render({elem:'#endTime', type:'datetime'});
+
+        tableIns = table.render({
+            elem: "#assetTable",
+            url: "/asset/loadAllAsset",
+            toolbar: "#assetToolBar",
+            page: true,
+            cols: [ [
+                {type: 'checkbox', fixed: 'left'},
+                {field: 'id', title: 'ID', align: 'center', width: '60'},
+                {field: 'maintenanceId', title: '运维编号', align: 'center', width: '120'},
+                {field: 'type', title: '设备类型', align: 'center', width: '100'},
+                {field: 'brand', title: '品牌', align: 'center', width: '100'},
+                {field: 'serialNo', title: '序列号', align: 'center', width: '120'},
+                {field: 'assetNo', title: '资产编号', align: 'center', width: '120'},
+                {field: 'location', title: '位置', align: 'center', width: '120'},
+                {field: 'status', title: '状态', align: 'center', width: '100', templet: function(d){
+                    return d.status == 'IN_STOCK' ? '<span class="layui-badge layui-bg-green">在库</span>' : '<span class="layui-badge layui-bg-gray">已出库</span>';
+                }},
+                {field: 'createTime', title: '入库时间', align: 'center', width: '160'},
+                {fixed: 'right', title: '操作', toolbar: '#assetRowBar', align: 'center', width: '220'}
+            ] ]
+        });
+
+        form.on("submit(doSearch)", function (data) {
+            tableIns.reload({where: data.field, page: {curr: 1}});
+            return false;
+        });
+
+        table.on("toolbar(assetTable)", function (obj) {
+            switch(obj.event) {
+                case 'add': openAddLayer(); break;
+                case 'batchImport': openImportLayer(); break;
+                case 'downloadTemplate': window.location.href="/assetInport/downloadTemplate"; break;
+                case 'typeManager': openTypeManager(); break;
+                case 'batchDelete': batchDelete(); break;
+            }
+        });
+
+        // 类型管理相关逻辑
+        var typeTableIns;
+        function openTypeManager() {
+            layer.open({
+                type: 1,
+                content: $("#typeManagerDiv"),
+                area: ['600px', '500px'],
+                title: '设备类型管理',
+                success: function () {
+                    typeTableIns = table.render({
+                        elem: "#typeTable",
+                        url: "/assetType/loadAssetTypeManager",
+                        toolbar: "#typeToolBar",
+                        page: true,
+                        cols: [ [
+                            {field: 'id', title: 'ID', align: 'center', width: 80},
+                            {field: 'name', title: '类型名称', align: 'center'},
+                            {field: 'createTime', title: '创建时间', align: 'center'},
+                            {fixed: 'right', title: '操作', toolbar: '#typeRowBar', align: 'center', width: 100}
+                        ] ]
+                    });
+                }
+            });
+        }
+
+        table.on("toolbar(typeTable)", function (obj) {
+            if (obj.event === 'addType') {
+                openAddTypeLayer();
+            }
+        });
+
+        table.on("tool(typeTable)", function (obj) {
+            if (obj.event === 'deleteType') {
+                layer.confirm('确定删除类型【' + obj.data.name + '】吗？', function(index){
+                    $.post("/assetType/deleteAssetType", {id: obj.data.id}, function(res){
+                        if(res.code == 200){
+                            typeTableIns.reload();
+                            initAssetTypeSelect(); // 刷新下拉框
+                        }
+                        layer.msg(res.msg);
+                    });
+                    layer.close(index);
+                });
+            }
+        });
+
+        var typeLayerIndex;
+        function openAddTypeLayer() {
+            typeLayerIndex = layer.open({
+                type: 1,
+                content: $("#addTypeDiv"),
+                area: ['400px', '200px'],
+                title: '添加设备类型',
+                success: function () {
+                    $("#typeFrm")[0].reset();
+                }
+            });
+        }
+
+        form.on("submit(doSubmitType)", function (data) {
+            $.post("/assetType/addAssetType", data.field, function (res) {
+                if (res.code == 200) {
+                    typeTableIns.reload();
+                    initAssetTypeSelect(); // 刷新下拉框
+                    layer.close(typeLayerIndex);
+                }
+                layer.msg(res.msg);
+            });
+            return false;
+        });
+
+        table.on("tool(assetTable)", function (obj) {
+            var data = obj.data;
+            if (obj.event === 'delete') deleteAsset(data);
+            else if (obj.event === 'update') updateAsset(data);
+            else if (obj.event === 'outport') openOutportLayer(data);
+        });
+
+        var mainIndex;
+        var url;
+
+
+
+        function openOutportLayer(data) {
+            mainIndex = layer.open({
+                type: 1,
+                content: $("#outportDiv"),
+                area: ['600px', '350px'],
+                title: '资产出库办理',
+                success: function () {
+                    $("#outportFrm")[0].reset();
+                    $("input[name='assetId']").val(data.id);
+                }
+            });
+        }
+
+        form.on("submit(doOutport)", function (data) {
+            $.post("/assetOutport/addAssetOutport", data.field, function (res) {
+                if (res.code == 200) tableIns.reload();
+                layer.msg(res.msg);
+                layer.close(mainIndex);
+            });
+            return false;
+        });
+
+        function openAddLayer() {
+            mainIndex = layer.open({
+                type: 1,
+                content: $("#addOrUpdateDiv"),
+                area: ['800px', '450px'],
+                title: '资产入库登记',
+                success: function () {
+                    $("#dataFrm")[0].reset();
+                    url = "/assetInport/addAssetInport";
+                }
+            });
+        }
+        
+        function openImportLayer() {
+            mainIndex = layer.open({
+                type: 1,
+                content: $("#importDiv"),
+                area: ['400px', '300px'],
+                title: '批量导入资产',
+                success: function (layero, index) {
+                    var loadIndex;
+                    upload.render({
+                        elem: layero.find('#uploadFile'),
+                        url: '/assetInport/batchImport',
+                        accept: 'file',
+                        exts: 'xls|xlsx',
+                        before: function(obj){
+                            loadIndex = layer.load(2, {shade: [0.3, '#333']}); // 上传时显示等待层
+                        },
+                        done: function(res){
+                            layer.close(loadIndex);
+                            layer.msg(res.msg);
+                            layer.close(mainIndex);
+                            tableIns.reload();
+                        },
+                        error: function(){
+                            layer.close(loadIndex);
+                            layer.msg('上传过程中出现网络异常或服务器错误', {icon: 2});
+                        }
+                    });
+                }
+            });
+        }
+
+        function updateAsset(data) {
+            mainIndex = layer.open({
+                type: 1,
+                content: $("#addOrUpdateDiv"),
+                area: ['800px', '450px'],
+                title: '修改资产信息',
+                success: function () {
+                    $("#dataFrm")[0].reset();
+                    form.val("dataFrm", data);
+                    url = "/asset/updateAsset";
+                }
+            });
+        }
+
+        form.on("submit(doSubmit)", function (data) {
+            $.post(url, data.field, function (res) {
+                if (res.code == 200) tableIns.reload();
+                layer.msg(res.msg);
+                layer.close(mainIndex);
+            });
+            return false;
+        });
+
+        function deleteAsset(data) {
+            layer.confirm('确定要删除运维编号为【' + data.maintenanceId + '】的资产吗？', function (index) {
+                $.post("/asset/deleteAsset", {id: data.id}, function (res) {
+                    if (res.code == 200) tableIns.reload();
+                    layer.msg(res.msg);
+                });
+                layer.close(index);
+            });
+        }
+
+        // 批量删除
+        function batchDelete() {
+            var checkStatus = table.checkStatus('assetTable');
+            var data = checkStatus.data;
+            if(data.length > 0){
+                layer.confirm('确定要删除选中的 ' + data.length + ' 条记录吗？此操作不可恢复！', {icon: 3, title: '提示'}, function(index){
+                    var ids = [];
+                    $.each(data, function(index, item){
+                        ids.push(item.id);
+                    });
+                    $.post("/asset/batchDeleteAsset", {ids: ids.join(",")}, function(res){
+                        if(res.code == 200){
+                            tableIns.reload();
+                            layer.msg("成功删除 " + data.length + " 条记录");
+                        }else{
+                            layer.msg(res.msg);
+                        }
+                    });
+                    layer.close(index);
+                });
+            }else{
+                layer.msg("请选中要删除的记录");
+            }
+        }
+
+        // 键盘快捷键支持
+        $(document).on('keydown', function(e){
+            // Delete键触发删除
+            if(e.keyCode == 46) {
+                batchDelete();
+            }
+            // Ctrl+A 全选
+            if(e.ctrlKey && e.keyCode == 65) {
+                // 模拟点击表头的全选复选框
+                $('div[lay-id="assetTable"] .layui-table-header .layui-form-checkbox').click();
+                e.preventDefault(); // 阻止默认的全选文本行为
+            }
+        });
+    });
+</script>
+</body>
+</html>

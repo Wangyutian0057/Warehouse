@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yeqifu.bus.mapper.CheckAssetMapper">
+    <select id="queryCheckAssets" resultType="com.yeqifu.bus.entity.CheckAsset">
+        SELECT ca.*, 
+               a.brand || ' ' || a.serial_no as assetName, 
+               a.location, 
+               a.asset_no as assetNo,
+               a.maintenance_id as maintenanceId,
+               a.type as assetType,
+               a.brand,
+               a.serial_no as serialNo,
+               a.create_time as createTime,
+               a.operator as assetOperator
+        FROM bus_check_asset ca
+        LEFT JOIN bus_asset a ON ca.asset_id = a.id
+        WHERE ca.check_id = #{checkId}
+    </select>
+</mapper>

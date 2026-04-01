@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>库存查询</title>
+    <link rel="stylesheet" href="/resources/layui/css/layui.css" media="all"/>
+    <link rel="stylesheet" href="/resources/css/public.css" media="all"/>
+</head>
+<body class="childrenBody">
+    <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+      <ul class="layui-tab-title">
+        <li class="layui-this">资产库存</li>
+        <li>耗材库存</li>
+      </ul>
+      <div class="layui-tab-content">
+        <div class="layui-tab-item layui-show">
+            <!-- Asset Table -->
+            <table class="layui-hide" id="assetTable" lay-filter="assetTable"></table>
+        </div>
+        <div class="layui-tab-item">
+            <!-- Consumable Table -->
+            <table class="layui-hide" id="consumableTable" lay-filter="consumableTable"></table>
+        </div>
+      </div>
+    </div>
+
+<script type="text/javascript" src="/resources/layui/layui.js"></script>
+<script type="text/javascript">
+    layui.use(['element', 'table'], function(){
+      var element = layui.element;
+      var table = layui.table;
+      
+      // Asset Table
+      table.render({
+        elem: '#assetTable',
+        url: '/asset/loadAllAsset',
+        page: true,
+        cols: [ [
+            {field: 'id', title: 'ID', width: 60},
+            {field: 'name', title: '资产名称'},
+            {field: 'type', title: '设备类型'},
+            {field: 'model', title: '品牌型号'},
+            {field: 'quantity', title: '数量', width: 80},
+            {field: 'location', title: '位置'}
+        ] ]
+      });
+
+      // Consumable Table
+      table.render({
+        elem: '#consumableTable',
+        url: '/consumable/loadAllConsumable',
+        page: true,
+        cols: [ [
+            {field: 'id', title: 'ID', width: 60},
+            {field: 'type', title: '耗材名称'},
+            {field: 'quantity', title: '数量', width: 80},
+            {field: 'location', title: '位置'},
+            {field: 'threshold', title: '阈值', width: 80}
+        ] ]
+      });
+      
+    });
+</script>
+</body>
+</html>

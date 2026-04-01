@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yeqifu.bus.mapper.ConsumableRecordArchiveMapper">
+    <select id="queryArchivedRecordsWithDetails" resultType="java.util.Map">
+        SELECT 
+               r.id as "id",
+               r.type as "type",
+               r.quantity as "quantity",
+               r.date_time as "date_time",
+               r.operator as "operator",
+               r.applicant as "applicant",
+               r.remark as "remark",
+               c.type as "consumableName"
+        FROM bus_consumable_record_archive r
+        LEFT JOIN bus_consumable c ON r.consumable_id = c.id
+        WHERE r.archived_at = #{archivedTime}
+        ORDER BY r.date_time DESC
+    </select>
+</mapper>

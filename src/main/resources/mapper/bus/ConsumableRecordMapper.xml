@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yeqifu.bus.mapper.ConsumableRecordMapper">
+
+    <resultMap id="ConsumableRecordResultMap" type="com.yeqifu.bus.entity.ConsumableRecord">
+        <id column="id" property="id"/>
+        <result column="consumable_id" property="consumableId"/>
+        <result column="type" property="type"/>
+        <result column="quantity" property="quantity"/>
+        <result column="createtime" property="createtime"/>
+        <result column="applicant" property="applicant"/>
+        <result column="operator" property="operator"/>
+        <result column="remark" property="remark"/>
+        <result column="consumableType" property="consumableType"/>
+        <result column="consumableLocation" property="consumableLocation"/>
+    </resultMap>
+
+    <select id="queryAll" resultMap="ConsumableRecordResultMap">
+        SELECT r.id, r.date_time as createtime, r.consumable_id, r.quantity, r.remark, r.type, r.operator, r.applicant,
+               c.type as consumableType, 
+               c.location as consumableLocation
+        FROM bus_consumable_record r
+        LEFT JOIN bus_consumable c ON r.consumable_id = c.id
+        <where>
+            <if test="record.type != null and record.type != ''">
+                AND r.type = #{record.type}
+            </if>
+            <if test="record.consumableType != null and record.consumableType != ''">
+                AND c.type LIKE CONCAT('%', CONCAT(#{record.consumableType}, '%'))
+            </if>
+            <if test="direction != null and direction == 'IN'">
+                AND (r.type LIKE '%入库%' OR r.type = 'IN')
+            </if>
+            <if test="direction != null and direction == 'OUT'">
+                AND (r.type LIKE '%出库%' OR r.type = 'OUT')
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND r.date_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND r.date_time &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY r.date_time DESC
+    </select>
+
+    <select id="loadTrendStat" resultType="java.util.Map">
+        SELECT SUBSTR(date_time, 1, 10) as "date",
+               SUM(CASE WHEN type LIKE '%入库%' OR type='IN' THEN quantity ELSE 0 END) as "inCount",
+               SUM(CASE WHEN type LIKE '%出库%' OR type='OUT' THEN quantity ELSE 0 END) as "outCount"
+        FROM bus_consumable_record
+        WHERE date_time &gt;= #{startTime}
+        GROUP BY SUBSTR(date_time, 1, 10)
+        ORDER BY "date" ASC
+    </select>
+
+</mapper>

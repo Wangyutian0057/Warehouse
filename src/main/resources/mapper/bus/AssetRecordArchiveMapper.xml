@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yeqifu.bus.mapper.AssetRecordArchiveMapper">
+    <select id="queryArchivedRecordsWithDetails" resultType="java.util.Map">
+        SELECT 
+               r.id as "id",
+               r.type as "type",
+               r.date_time as "date_time",
+               r.applicant as "applicant",
+               r.operator as "operator",
+               r.remark as "remark",
+               a.asset_no as "assetNo", 
+               a.brand as "assetBrand", 
+               a.type as "assetType", 
+               a.maintenance_id as "maintenanceId",
+               a.serial_no as "serialNo",
+               a.location as "location"
+        FROM bus_asset_record_archive r
+        LEFT JOIN bus_asset a ON r.asset_id = a.id
+        WHERE r.archived_at = #{archivedTime}
+        ORDER BY r.date_time DESC
+    </select>
+</mapper>

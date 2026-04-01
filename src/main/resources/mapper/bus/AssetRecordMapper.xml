@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yeqifu.bus.mapper.AssetRecordMapper">
+
+    <select id="queryAll" resultType="com.yeqifu.bus.entity.AssetRecord">
+        SELECT r.id, r.date_time as createtime, r.asset_id, r.remark, r.type, r.operator, r.applicant,
+               a.maintenance_id as maintenanceId, 
+               a.type as assetType,
+               a.brand as assetBrand,
+               a.asset_no as assetNo
+        FROM bus_asset_record r
+        LEFT JOIN bus_asset a ON r.asset_id = a.id
+        <where>
+            <if test="record.type != null and record.type != ''">
+                AND r.type = #{record.type}
+            </if>
+            <if test="record.maintenanceId != null and record.maintenanceId != ''">
+                AND a.maintenance_id LIKE '%' || #{record.maintenanceId} || '%'
+            </if>
+            <if test="record.assetNo != null and record.assetNo != ''">
+                AND a.asset_no = #{record.assetNo}
+            </if>
+            <if test="record.assetId != null">
+                AND r.asset_id = #{record.assetId}
+            </if>
+            <if test="direction != null and direction == 'IN'">
+                AND (r.type LIKE '%入库%' OR r.type = 'IN')
+            </if>
+            <if test="direction != null and direction == 'OUT'">
+                AND (r.type LIKE '%出库%' OR r.type = 'OUT')
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND r.date_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND r.date_time &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY r.date_time DESC
+    </select>
+
+    <select id="loadAssetTrend" resultType="java.util.Map">
+        SELECT SUBSTR(date_time, 1, 10) as "date", COUNT(1) as "count"
+        FROM bus_asset_record
+        WHERE (type LIKE '%出库%' OR type='OUT') AND date_time &gt;= #{startTime}
+        GROUP BY SUBSTR(date_time, 1, 10)
+        ORDER BY "date" ASC
+    </select>
+
+</mapper>
